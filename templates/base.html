@@ -4,7 +4,7 @@
         {% block head %}
         {# Bootstrap CSS #}
         <link href="{{ url_for("static", filename="bootstrap/css/bootstrap.min.css") }}" rel="stylesheet">
-        <title>{% block secondtitle %}{% endblock %}{% block septitle %} :: {% endblock %}{% block primarytitle %}IoT Warden{% endblock %}</title>
+        <title>{% block secondarytitle %}{% endblock %}{% block septitle %} :: {% endblock %}{% block primarytitle %}IoT Warden{% endblock %}</title>
         {% endblock %}
     </head>
     <body>
@@ -13,17 +13,20 @@
             <div class="container-fluid">
                 <a class="navbar-brand text-light" href="/">IoT Warden</a>
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!--
                     <li class="nav-item">
-                        <a class="nav-link text-light" href="#">Not Implemented</a>
+                        <a class="nav-link text-light" href="/mongo">Mongo Express</a>
                     </li>
-                    -->
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="/redis">Redis</a>
+                    </li>
                 </ul>
             </div>
         </nav>
+        {% block supercontent %}
         {# Content container #}
         <div class="container" id="content">
             {% block content %}{% endblock %}
         </div>
+        {% endblock %}
     </body>
 </html>
