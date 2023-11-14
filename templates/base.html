@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% block head %}
+        {# Bootstrap CSS #}
+        <link href="{{ url_for("static", filename="bootstrap/css/bootstrap.min.css") }}" rel="stylesheet">
+        <title>{% block secondtitle %}{% endblock %}{% block septitle %} :: {% endblock %}{% block primarytitle %}IoT Warden{% endblock %}</title>
+        {% endblock %}
+    </head>
+    <body>
+        {# Navigation Bar #}
+        <nav class="navbar navbar-expand-lg bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand text-light" href="/">IoT Warden</a>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!--
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="#">Not Implemented</a>
+                    </li>
+                    -->
+                </ul>
+            </div>
+        </nav>
+        {# Content container #}
+        <div class="container" id="content">
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>
