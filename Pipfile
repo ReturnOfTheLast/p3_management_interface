@@ -4,14 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pymongo = "*"
-redis = "*"
 flask = "*"
-gotify = "*"
+python-dotenv = "*"
+requests = "*"
+pymongo = "*"
 
 [dev-packages]
 ipython = "*"
-pynvim = "*"
 
 [requires]
 python_version = "3.12"

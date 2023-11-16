@@ -2,52 +2,109 @@
 # https://github.com/ReturnOfTheLast/p3_management_interface
 
 from flask import Flask, render_template, request, jsonify
-from gotify import Gotify
+from pymongo import MongoClient
+from pymongo.database import Database
+from pymongo.collection import Collection
+from pymongo.cursor import Cursor
+from dotenv import load_dotenv
+from os import environ
+from bson import json_util
+from bson import ObjectId
+import requests
 import json
 
-with open('config.json', 'r') as fp:
-    config: dict = json.load(fp)
+load_dotenv()
 
-gotifies: list[Gotify] = list()
-for token in config['gotify_tokens']:
-    gotifies.append(Gotify(
-        base_url=config['gotify_url'],
-        app_token=token
-    ))
-
-app = Flask(__name__)
+app: Flask = Flask(__name__)
+mongo: MongoClient = MongoClient(environ['MONGO_URI'])
+db: Database = mongo['iotwarden-management']
+users_col: Collection = db['users']
 
 
 # --- [ Frontend ]
 @app.get('/')
-def index():
+def front_index():
     return render_template('index.html')
 
 
 @app.get('/mongo')
-def mongo():
+def front_mongo():
     return render_template('mongo.html')
 
 
 @app.get('/redis')
-def redis():
+def front_redis():
     return render_template('redis.html')
 
 
 # --- [ API ]
-@app.post('/api/notify')
-def notify():
+@app.get('/api/users')
+def api_get_users():
+    args = request.args
+    if args.get('id', None):
+        users: Cursor = users_col.find_one({'_id': ObjectId(args['id'])})
+    else:
+        users: Cursor = users_col.find()
+
+    return jsonify(json.loads(json_util.dumps(users)))
+
+
+@app.post('/api/users/add')
+def api_add_user():
     req_json = request.get_json()
-    for gotify in gotifies:
-        gotify.create_message(
-            req_json["message"],
-            title=req_json["title"],
-            priority=req_json["priority"]
-        )
+    if not req_json.get('name', None):
+        return jsonify({
+            "success": False,
+            "payload": {},
+            "error": {
+                "code": 400,
+                "message": "User must have a name"
+            }
+        }), 400
+
+    oid: ObjectId = users_col.insert_one(req_json).inserted_id
     return jsonify({
-        "number_of_messages": len(gotifies)
+        "success": True,
+        "payload": {
+            "id": str(oid)
+        }
+    })
+
+
+@app.post('/api/notify')
+def api_notify():
+    req_json = request.get_json()
+    if not req_json.get('message', None):
+        return jsonify({
+            "success": False,
+            "payload": {},
+            "error": {
+                "code": 400,
+                "message": "A message must be set"
+            }
+        }), 400
+
+    message_count: int = 0
+    for user in users_col.find():
+        token = user.get('gotify_token', None)
+        if token:
+            requests.post(
+                f'https://gotify.osiriz.xyz/message?token={token}',
+                json={
+                    'message': req_json.get('message'),
+                    'priority': req_json.get('priority', 0),
+                    'title': req_json.get('title', 'IoT-Warden')
+                }
+            )
+            message_count += 1
+
+    return jsonify({
+        "success": True,
+        "payload": {
+            "message_count": message_count
+        }
     })
 
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', 8080)
+    app.run('0.0.0.0', 8080, debug=True)
