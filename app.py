@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from os import environ
 from bson import json_util
 from bson import ObjectId
+from redis import Redis
 import requests
 import json
 
@@ -23,27 +24,43 @@ users_col: Collection = db_management['users']
 db_system: Database = mongo['iotwarden']
 whiteblacklist: Collection = db_system['whiteblacklist']
 
+redis_client: Redis = Redis(environ['REDIS_HOST'], environ['REDIS_PORT'])
+
 
 # --- [ Frontend ]
 @app.get('/')
 def front_index():
     users: Cursor = users_col.find()
-    whiteblacklist_entries: Cursor = whiteblacklist.find()
-    whitelisted = []
-    blacklisted = []
+    mongo_wbl_entries: Cursor = whiteblacklist.find()
+    mongo_wl = []
+    mongo_bl = []
+    redis_wl = []
+    redis_bl = []
 
-    for entry in whiteblacklist_entries:
+    for entry in mongo_wbl_entries:
         if entry['allowed']:
-            whitelisted.append(entry)
+            mongo_wl.append(entry)
         else:
-            blacklisted.append(entry)
+            mongo_bl.append(entry)
+
+    for key in redis_client.scan_iter():
+        str_key = key.decode()
+        if str_key[:5] == "list_":
+            if redis_client.get(key) == 'white':
+                redis_wl.append(key[5:])
+            else:
+                redis_bl.append(key[5:])
 
     return render_template(
         'index.html',
         users=users,
-        whiteblacklists=[
-            ("Whitelisted", whitelisted),
-            ("Blacklisted", blacklisted)
+        mongo_wbl=[
+            ("Whitelisted", mongo_wl),
+            ("Blacklisted", mongo_bl)
+        ],
+        redis_wbl=[
+            ('Whitelisted', redis_wl),
+            ("Blacklisted", redis_bl)
         ]
     )
 
