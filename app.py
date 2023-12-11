@@ -47,9 +47,9 @@ def front_index():
         str_key = key.decode()
         if str_key[:5] == "list_":
             if redis_client.get(key) == 'white':
-                redis_wl.append(key[5:])
+                redis_wl.append(str_key[5:])
             else:
-                redis_bl.append(key[5:])
+                redis_bl.append(str_key[5:])
 
     return render_template(
         'index.html',
