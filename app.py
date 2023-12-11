@@ -17,14 +17,35 @@ load_dotenv()
 
 app: Flask = Flask(__name__)
 mongo: MongoClient = MongoClient(environ['MONGO_URI'])
-db: Database = mongo['iotwarden-management']
-users_col: Collection = db['users']
+db_management: Database = mongo['iotwarden-management']
+users_col: Collection = db_management['users']
+
+db_system: Database = mongo['iotwarden']
+whiteblacklist: Collection = db_system['whiteblacklist']
 
 
 # --- [ Frontend ]
 @app.get('/')
 def front_index():
-    return render_template('index.html')
+    users: Cursor = users_col.find()
+    whiteblacklist_entries: Cursor = whiteblacklist.find()
+    whitelisted = []
+    blacklisted = []
+
+    for entry in whiteblacklist_entries:
+        if entry['allowed']:
+            whitelisted.append(entry)
+        else:
+            blacklisted.append(entry)
+
+    return render_template(
+        'index.html',
+        users=users,
+        whiteblacklists=[
+            ("Whitelisted", whitelisted),
+            ("Blacklisted", blacklisted)
+        ]
+    )
 
 
 @app.get('/mongo')

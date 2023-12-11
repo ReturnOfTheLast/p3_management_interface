@@ -2,4 +2,47 @@
 {% block septitle %}{% endblock %}
 {% block content %}
     <h1 class="text-center">IoT Warden</h1>
+    <div class="row">
+        <div class="col">
+            <h2 class="text-center">Users</h2>
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Gotify Token</th>
+                </thead>
+                <tbody>
+                    {% for entry in users %}
+                    <tr>
+                        <th scope="row">{{ entry['_id'] }}</th>
+                        <td>{{ entry['name'] }}</td>
+                        <td>{{ entry['gotify_token'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% for name, list in whiteblacklists %}
+            <div class="col">
+                <h2 class="text-center">{{ name }}</h2>
+                <table class="table table-dark table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">IP Addresses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in list %}
+                        <tr>
+                            <th scope="row">{{ entry['_id'] }}</th>
+                            <td>{{ entry['ip'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
