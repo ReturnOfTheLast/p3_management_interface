@@ -67,12 +67,14 @@ def front_index():
 
 @app.get('/mongo')
 def front_mongo():
-    return render_template('mongo.html')
+    hostname = request.headers.get('Host').split(':')[0]
+    return render_template('mongo.html', hostname=hostname)
 
 
 @app.get('/redis')
 def front_redis():
-    return render_template('redis.html')
+    hostname = request.headers.get('Host').split(':')[0]
+    return render_template('redis.html', hostname=hostname)
 
 
 # --- [ API ]
