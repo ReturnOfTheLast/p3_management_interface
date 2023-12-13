@@ -90,7 +90,7 @@ def front_add_user():
         data = request.form
         hostname = request.headers.get('Host')
 
-        requests.get(
+        requests.post(
             f"http://{hostname}{url_for('api_add_user')}",
             json={
                 'name': data['name'],
