@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 # https://github.com/ReturnOfTheLast/p3_management_interface
 
-from flask import Flask, render_template, request, jsonify
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    redirect,
+    url_for
+)
 from pymongo import MongoClient
 from pymongo.database import Database
 from pymongo.collection import Collection
@@ -75,6 +82,20 @@ def front_mongo():
 def front_redis():
     hostname = request.headers.get('Host').split(':')[0]
     return render_template('redis.html', hostname=hostname)
+
+
+@app.route('/users/add', methods=['GET', 'POST'])
+def front_add_user():
+    if request.method == 'POST':
+        data = request.data
+
+        requests.get(url_for('api_add_user'), json={
+            'name': data['name'],
+            'gotify_token': data['gotify_token']
+        })
+        return redirect(url_for('front_index'))
+
+    return render_template('add_user.html')
 
 
 # --- [ API ]
