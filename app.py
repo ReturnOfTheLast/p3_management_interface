@@ -88,11 +88,15 @@ def front_redis():
 def front_add_user():
     if request.method == 'POST':
         data = request.form
+        hostname = request.headers.get('Host').split(':')
 
-        requests.get(url_for('api_add_user'), json={
-            'name': data['name'],
-            'gotify_token': data['gotify_token']
-        })
+        requests.get(
+            f"http://{hostname}{url_for('api_add_user')}",
+            json={
+                'name': data['name'],
+                'gotify_token': data['gotify_token']
+            }
+        )
         return redirect(url_for('front_index'))
 
     return render_template('add_user.html')
