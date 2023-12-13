@@ -87,7 +87,7 @@ def front_redis():
 @app.route('/users/add', methods=['GET', 'POST'])
 def front_add_user():
     if request.method == 'POST':
-        data = request.data
+        data = request.form
 
         requests.get(url_for('api_add_user'), json={
             'name': data['name'],
