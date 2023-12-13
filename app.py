@@ -88,7 +88,7 @@ def front_redis():
 def front_add_user():
     if request.method == 'POST':
         data = request.form
-        hostname = request.headers.get('Host').split(':')
+        hostname = request.headers.get('Host')
 
         requests.get(
             f"http://{hostname}{url_for('api_add_user')}",
